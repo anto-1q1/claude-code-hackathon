@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contoso Financial — Cloud Migration | Team TimisA</title>
+<style>
+  :root {
+    --accent: #7B2FBE;
+    --accent2: #A855F7;
+    --green: #22C55E;
+    --red: #EF4444;
+    --yellow: #F59E0B;
+    --bg: #0F0F1A;
+    --bg2: #1A1A2E;
+    --bg3: #16213E;
+    --text: #E2E8F0;
+    --muted: #94A3B8;
+    --border: rgba(123,47,190,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Slides container */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 80px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.45s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+    text-align: center;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+  .slide.prev {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+  .slide.left { text-align: left; align-items: flex-start; }
+
+  /* Nav */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    z-index: 100;
+    background: rgba(15,15,26,0.8);
+    padding: 10px 20px;
+    border-radius: 40px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .nav button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  .nav button:hover { background: var(--accent); border-color: var(--accent); }
+  .nav .counter { color: var(--muted); font-size: 13px; min-width: 60px; text-align: center; }
+
+  /* Progress bar */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+
+  /* Typography */
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  h1 { font-size: clamp(36px, 5vw, 64px); font-weight: 800; line-height: 1.1; }
+  h2 { font-size: clamp(28px, 3.5vw, 46px); font-weight: 700; line-height: 1.2; }
+  h3 { font-size: clamp(18px, 2vw, 26px); font-weight: 600; }
+  .subtitle { font-size: clamp(16px, 1.8vw, 22px); color: var(--muted); margin-top: 16px; max-width: 680px; }
+  .lead { font-size: clamp(18px, 2vw, 26px); line-height: 1.6; max-width: 800px; }
+
+  /* Cards */
+  .grid { display: grid; gap: 20px; width: 100%; max-width: 1100px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: left;
+  }
+  .card.accent-border { border-color: var(--accent); }
+  .card.green-border { border-color: var(--green); }
+  .card.red-border { border-color: var(--red); }
+
+  .card .icon { font-size: 28px; margin-bottom: 12px; }
+  .card h3 { margin-bottom: 8px; }
+  .card p { color: var(--muted); font-size: 15px; line-height: 1.5; }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-red { background: rgba(239,68,68,0.15); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: #86EFAC; border: 1px solid rgba(34,197,94,0.3); }
+  .badge-yellow { background: rgba(245,158,11,0.15); color: #FCD34D; border: 1px solid rgba(245,158,11,0.3); }
+  .badge-purple { background: rgba(123,47,190,0.2); color: var(--accent2); border: 1px solid var(--border); }
+
+  /* Numbers */
+  .big-number { font-size: clamp(40px, 5vw, 72px); font-weight: 800; color: var(--accent2); line-height: 1; }
+  .big-number.green { color: var(--green); }
+  .big-number.red { color: var(--red); }
+
+  /* Table */
+  .comparison {
+    width: 100%;
+    max-width: 900px;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  .comparison th {
+    padding: 14px 20px;
+    text-align: left;
+    background: var(--bg3);
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .comparison td {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .comparison tr:last-child td { border-bottom: none; }
+  .comparison .winner { color: var(--green); font-weight: 600; }
+  .comparison .loser { color: var(--red); }
+
+  /* Timeline */
+  .timeline { width: 100%; max-width: 900px; }
+  .tl-item {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: flex-start;
+  }
+  .tl-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .tl-content h3 { font-size: 17px; margin-bottom: 4px; }
+  .tl-content p { color: var(--muted); font-size: 14px; }
+
+  /* Accent line */
+  .accent-line {
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin: 20px 0;
+  }
+  .accent-line.centered { margin: 20px auto; }
+
+  /* Cover background */
+  .slide-cover { background: radial-gradient(ellipse at 30% 50%, rgba(123,47,190,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(168,85,247,0.08) 0%, transparent 50%), var(--bg); }
+
+  /* Highlight box */
+  .highlight {
+    background: linear-gradient(135deg, rgba(123,47,190,0.15), rgba(168,85,247,0.08));
+    border: 1px solid var(--accent);
+    border-radius: 16px;
+    padding: 28px 36px;
+    max-width: 800px;
+    text-align: center;
+  }
+  .highlight p { font-size: 20px; line-height: 1.6; font-style: italic; color: var(--text); }
+  .highlight cite { display: block; margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+  /* Warning box */
+  .warning {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .warning .icon { font-size: 20px; flex-shrink: 0; }
+  .warning p { font-size: 15px; color: #FCA5A5; line-height: 1.5; }
+
+  /* Divider */
+  .divider { width: 100%; height: 1px; background: var(--border); margin: 24px 0; }
+
+  /* Workload pill */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  /* Section header */
+  .section-header {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 32px;
+  }
+
+  /* ADR list */
+  .adr-list { list-style: none; width: 100%; max-width: 900px; }
+  .adr-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .adr-list li:last-child { border-bottom: none; }
+  .adr-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent2);
+    background: rgba(123,47,190,0.15);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .adr-list .title { font-size: 16px; font-weight: 600; }
+  .adr-list .desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+  /* Slide-specific */
+  .metric-row { display: flex; gap: 40px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .metric { text-align: center; }
+  .metric .label { font-size: 13px; color: var(--muted); margin-top: 8px; max-width: 140px; }
+
+  .vs-divider {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    padding-top: 12px;
+  }
+
+  .arch-row {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    width: 100%;
+    max-width: 1000px;
+  }
+  .arch-box {
+    flex: 1;
+    padding: 24px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  .arch-box:first-child { border-radius: 16px 0 0 16px; }
+  .arch-box:last-child { border-radius: 0 16px 16px 0; }
+  .arch-box .label { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; }
+  .arch-box h3 { font-size: 16px; margin-bottom: 8px; }
+  .arch-box .services { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .service-tag {
+    font-size: 11px;
+    background: rgba(123,47,190,0.15);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  .arrow-box {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: var(--bg);
+    color: var(--accent2);
+    font-size: 20px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Team slide */
+  .team-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    width: 240px;
+  }
+  .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 16px;
+    font-weight: 800;
+    color: white;
+  }
+
+  .checklist { list-style: none; width: 100%; max-width: 600px; text-align: left; }
+  .checklist li { display: flex; gap: 12px; padding: 10px 0; font-size: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .checklist li:last-child { border-bottom: none; }
+  .check { color: var(--green); font-size: 18px; }
+  .cross { color: var(--red); font-size: 18px; }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: Cover -->
+  <div class="slide slide-cover active" id="s1">
+    <div class="eyebrow">Cloud Migration · Contoso Financial · 2026</div>
+    <h1>The Lift, the Shift,<br>and the 4am Call</h1>
+    <div class="accent-line centered"></div>
+    <p class="subtitle">How we migrated three critical workloads to AWS — without the 4am call.</p>
+    <div style="margin-top:40px; display:flex; gap:16px; flex-wrap:wrap; justify-content:center;">
+      <span class="pill">👤 Team TimisA</span>
+      <span class="pill">🏦 Contoso Financial</span>
+      <span class="pill">☁️ Scenario 2 — Cloud Migration</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: The Problem -->
+  <div class="slide left" id="s2">
+    <div class="section-header">
+      <div class="eyebrow">The Brief</div>
+      <h2>Three workloads.<br>One cloud. Zero downtime.</h2>
+    </div>
+    <div class="grid grid-3" style="max-width:1100px;">
+      <div class="card">
+        <div class="icon">🌐</div>
+        <h3>Web App</h3>
+        <p>Customer-facing Flask application. Stateful, single-instance, hardcoded IPs throughout.</p>
+        <div style="margin-top:14px"><span class="badge badge-red">Legacy</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">⚙️</div>
+        <h3>Batch Reconciliation</h3>
+        <p>Nightly job running ~2 hours. Appends to files. No retry safety. Runs at 02:00 sharp.</p>
+        <div style="margin-top:14px"><span class="badge badge-red">Fragile</span></div>
+      </div>
+      <div class="card">
+        <div class="icon">🗄️</div>
+        <h3>Reporting Database</h3>
+        <p>PostgreSQL serving 5 internal teams. No connection pooling. Last backup untested: Nov 2022.</p>
+        <div style="margin-top:14px"><span class="badge badge-red">Unverified</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: Discovery -->
+  <div class="slide left" id="s3">
+    <div class="section-header">
+      <div class="eyebrow">Discovery</div>
+      <h2>What we actually found.</h2>
+      <p style="color:var(--muted);margin-top:8px;font-size:16px;">Five blockers. Two of them invisible until we dug in.</p>
+    </div>
+    <div class="grid grid-2" style="max-width:1100px; gap:16px;">
+      <div class="card red-border">
+        <div class="icon">🔌</div>
+        <h3>Hardcoded IP <span class="badge badge-red" style="margin-left:8px">Blocker</span></h3>
+        <p>Database connection hardcoded to <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">10.0.1.82</code>. RDS failover would have been invisible to the app.</p>
+      </div>
+      <div class="card red-border">
+        <div class="icon">🔐</div>
+        <h3>Credentials in plaintext <span class="badge badge-red" style="margin-left:8px">7 Years</span></h3>
+        <p>DB password in source code since 2017. No rotation ever. Git history scrub required.</p>
+      </div>
+      <div class="card" style="border-color:var(--yellow)">
+        <div class="icon">📁</div>
+        <h3>NFS dependency</h3>
+        <p>Both web app and batch write to a shared network drive. Doesn't exist in AWS.</p>
+      </div>
+      <div class="card" style="border-color:var(--yellow)">
+        <div class="icon">💾</div>
+        <h3>Sessions on local disk</h3>
+        <p><code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">/tmp/flask_sessions/</code> — Fargate autoscaling would log out every user.</p>
+      </div>
+      <div class="card accent-border" style="grid-column:1/-1">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div class="icon">🕵️</div>
+          <div>
+            <h3>Hidden dependency — Unknown to the dev team <span class="badge badge-yellow" style="margin-left:8px">Surprise</span></h3>
+            <p>The batch job called <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;">webapp/api/warm-cache</code> via hardcoded IP 5 minutes before running. Migrating workloads independently would have caused silent failures at 02:00.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: Strategy Decision -->
+  <div class="slide" id="s4">
+    <div class="eyebrow">The Decision</div>
+    <h2>Lift-and-shift vs. Cloud-native refactor</h2>
+    <div class="accent-line centered"></div>
+    <div style="margin-top:8px;width:100%;max-width:900px;">
+      <table class="comparison">
+        <thead>
+          <tr>
+            <th>Criterion</th>
+            <th>Lift-and-Shift</th>
+            <th>Cloud-Native Refactor ✓</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Timeline</td>
+            <td class="winner">6–7 weeks</td>
+            <td class="winner">8–9 weeks (+2 weeks)</td>
+          </tr>
+          <tr>
+            <td>Initial investment</td>
+            <td class="winner">€18,000</td>
+            <td class="loser">€30,000 (+€12,000)</td>
+          </tr>
+          <tr>
+            <td>Second migration needed?</td>
+            <td class="loser">Yes (inevitable)</td>
+            <td class="winner">No</td>
+          </tr>
+          <tr>
+            <td>24-month total cost</td>
+            <td class="loser">~€61,400</td>
+            <td class="winner">~€41,900</td>
+          </tr>
+          <tr>
+            <td>Auto-scaling</td>
+            <td class="loser">No</td>
+            <td class="winner">Yes</td>
+          </tr>
+          <tr>
+            <td>Batch idle cost</td>
+            <td class="loser">EC2 always on</td>
+            <td class="winner">Pay-per-execution</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:28px;" class="highlight">
+      <p>"Lift-and-shift is not a cheaper option.<br>It is a deferred cost — with interest."</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: Financial Case (CFO) -->
+  <div class="slide" id="s5">
+    <div class="eyebrow">For the CFO</div>
+    <h2>The numbers.</h2>
+    <div class="accent-line centered"></div>
+    <div class="metric-row" style="margin-top:16px;">
+      <div class="metric">
+        <div class="big-number green">€19.5K</div>
+        <div class="label">Net savings over 24 months vs lift-and-shift</div>
+      </div>
+      <div class="vs-divider">·</div>
+      <div class="metric">
+        <div class="big-number">+2 wks</div>
+        <div class="label">Additional timeline for cloud-native refactor</div>
+      </div>
+      <div class="vs-divider">·</div>
+      <div class="metric">
+        <div class="big-number">€265</div>
+        <div class="label">Additional monthly cost (ElastiCache + RDS Proxy + Read Replica)</div>
+      </div>
+    </div>
+    <div class="divider" style="max-width:900px;margin:32px auto;"></div>
+    <div class="grid grid-3" style="max-width:900px;">
+      <div class="card" style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--accent2);">€50/mo</div>
+        <p style="margin-top:6px;">ElastiCache Redis<br><span style="font-size:12px;">(session state)</span></p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--accent2);">€180/mo</div>
+        <p style="margin-top:6px;">RDS Read Replica<br><span style="font-size:12px;">(reporting isolation)</span></p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div style="font-size:22px;font-weight:700;color:var(--accent2);">€30/mo</div>
+        <p style="margin-top:6px;">RDS Proxy<br><span style="font-size:12px;">(connection pooling)</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: Architecture (CTO) -->
+  <div class="slide left" id="s6">
+    <div class="section-header">
+      <div class="eyebrow">For the CTO</div>
+      <h2>Target architecture.</h2>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;width:100%;max-width:1000px;">
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="label">Workload 1</div>
+          <h3>🌐 Web App</h3>
+          <p style="color:var(--muted);font-size:14px;">Stateless Flask · 2–6 tasks · sessions in Redis</p>
+          <div class="services">
+            <span class="service-tag">CloudFront</span>
+            <span class="service-tag">ALB</span>
+            <span class="service-tag">ECS Fargate</span>
+            <span class="service-tag">ElastiCache Redis</span>
+          </div>
+        </div>
+        <div class="arrow-box">→</div>
+        <div class="arch-box">
+          <div class="label">On-prem</div>
+          <h3>EC2 single instance</h3>
+          <p style="color:var(--muted);font-size:14px;">Stateful · hardcoded IPs · no HA</p>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="label">Workload 2</div>
+          <h3>⚙️ Batch Reconciliation</h3>
+          <p style="color:var(--muted);font-size:14px;">Idempotent · EventBridge scheduled · retries safe</p>
+          <div class="services">
+            <span class="service-tag">AWS Batch</span>
+            <span class="service-tag">EventBridge</span>
+            <span class="service-tag">S3</span>
+          </div>
+        </div>
+        <div class="arrow-box">→</div>
+        <div class="arch-box">
+          <div class="label">On-prem</div>
+          <h3>Cron on app server</h3>
+          <p style="color:var(--muted);font-size:14px;">Appends files · no retries · coupled to web app</p>
+        </div>
+      </div>
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="label">Workload 3</div>
+          <h3>🗄️ Reporting DB</h3>
+          <p style="color:var(--muted);font-size:14px;">Multi-AZ · read replica · connection pooling</p>
+          <div class="services">
+            <span class="service-tag">RDS PostgreSQL</span>
+            <span class="service-tag">Multi-AZ</span>
+            <span class="service-tag">Read Replica</span>
+            <span class="service-tag">RDS Proxy</span>
+          </div>
+        </div>
+        <div class="arrow-box">→</div>
+        <div class="arch-box">
+          <div class="label">On-prem</div>
+          <h3>Single PostgreSQL</h3>
+          <p style="color:var(--muted);font-size:14px;">47 conn · no pooling · untested backups</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: Key Decisions (ADRs) -->
+  <div class="slide left" id="s7">
+    <div class="section-header">
+      <div class="eyebrow">Architecture Decisions</div>
+      <h2>8 ADRs. Every choice documented.</h2>
+    </div>
+    <ul class="adr-list">
+      <li>
+        <span class="adr-num">ADR-0001</span>
+        <div><div class="title">DNS over hardcoded IPs</div><div class="desc">Replaced 10.0.1.82 with DB_HOST env var — RDS failover now transparent to the app</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0002</span>
+        <div><div class="title">Separate S3 buckets per workload</div><div class="desc">Different retention policies (90 days vs 7 years) require isolation — simpler IAM, reduced risk</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0003</span>
+        <div><div class="title">AWS Secrets Manager + git history scrub</div><div class="desc">Credentials in plaintext for 7 years — auto-rotation + CloudWatch log redaction</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0004</span>
+        <div><div class="title">Session state → ElastiCache Redis</div><div class="desc">/tmp/flask_sessions breaks Fargate autoscaling — Redis makes the app fully stateless</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0005</span>
+        <div><div class="title">Decouple batch/webapp via EventBridge</div><div class="desc">Hidden cron dependency discovered — extracted to standalone warm-up task</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0006</span>
+        <div><div class="title">ECS Fargate + AWS Batch</div><div class="desc">Lambda rejected (15-min limit); EKS overkill for single service; Batch saves ~22h idle EC2/day</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0007</span>
+        <div><div class="title">RDS Multi-AZ + Read Replica + RDS Proxy</div><div class="desc">3 issues solved: write blocking, 47/100 conn limit, untested backups since Nov 2022</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+      <li>
+        <span class="adr-num">ADR-0008</span>
+        <div><div class="title">Batch idempotency via S3 PutObject + upsert</div><div class="desc">File-append bug discovered — retries now safe, no duplicate records on failure</div></div>
+        <span class="badge badge-green" style="margin-left:auto;flex-shrink:0">Accepted</span>
+      </li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 8: Timeline -->
+  <div class="slide left" id="s8">
+    <div class="section-header">
+      <div class="eyebrow">Execution Plan</div>
+      <h2>8 weeks. 3 parallel streams.</h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">1</div>
+        <div class="tl-content">
+          <h3>Weeks 1–2 — Foundations &amp; Blockers</h3>
+          <p>Resolve all 5 blockers: env vars, Secrets Manager, S3 buckets, Redis sessions, EventBridge decoupling. Docker Compose local environment validated.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">2</div>
+        <div class="tl-content">
+          <h3>Weeks 3–5 — Containerization (parallel)</h3>
+          <p>Three independent streams: web app containerized → ECS; batch job migrated → AWS Batch; RDS provisioned with Multi-AZ + read replica.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">3</div>
+        <div class="tl-content">
+          <h3>Weeks 6–7 — Integration &amp; Hardening</h3>
+          <p>Cross-workload validation, security audit, backup restore drill, load testing on read replica isolation.</p>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--green);">✓</div>
+        <div class="tl-content">
+          <h3>Week 8–9 — Cutover</h3>
+          <p>Blue/green deployment, DNS switchover, 48h parallel run, legacy decommission. First backup restore drill triggers tape decommission.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: Deliverables -->
+  <div class="slide" id="s9">
+    <div class="eyebrow">What we've built</div>
+    <h2>Deliverables.</h2>
+    <div class="accent-line centered"></div>
+    <div class="grid grid-2" style="max-width:900px;margin-top:8px;">
+      <div class="card green-border">
+        <div class="icon">✅</div>
+        <h3>Discovery Report</h3>
+        <p>5 migration blockers documented. Hidden batch→webapp dependency surfaced and resolved.</p>
+      </div>
+      <div class="card green-border">
+        <div class="icon">✅</div>
+        <h3>Strategic Memo</h3>
+        <p>Cloud-native refactor recommendation with full cost/time/benefit analysis vs lift-and-shift.</p>
+      </div>
+      <div class="card green-border">
+        <div class="icon">✅</div>
+        <h3>8 Architecture Decision Records</h3>
+        <p>Every technical choice documented with context, alternatives considered, and trade-offs.</p>
+      </div>
+      <div class="card green-border">
+        <div class="icon">✅</div>
+        <h3>Cost Analysis</h3>
+        <p>€19,500 net savings over 24 months. Monthly delta: €265. Payback modelled to month 18.</p>
+      </div>
+      <div class="card" style="border-color:var(--yellow);grid-column:1/-1">
+        <div style="display:flex;gap:16px;align-items:center;">
+          <div class="icon">🔧</div>
+          <div style="text-align:left;">
+            <h3>Infrastructure (in progress) — <span style="color:var(--yellow)">Next</span></h3>
+            <p>Docker Compose local environment · Terraform IaC for AWS · Validation test suite</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: The Ask -->
+  <div class="slide slide-cover" id="s10">
+    <div class="eyebrow">Next Steps</div>
+    <h2>We need your go-ahead.</h2>
+    <div class="accent-line centered"></div>
+    <div class="grid grid-3" style="max-width:900px;margin-top:16px;">
+      <div class="card" style="text-align:center;">
+        <div class="icon">💰</div>
+        <h3>CFO</h3>
+        <p>Approve €30K initial investment. Payback at month 18, €19.5K ahead by month 24.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon">🔧</div>
+        <h3>CTO</h3>
+        <p>Sign off on architecture. 8 ADRs ready for review. Terraform IaC next sprint.</p>
+      </div>
+      <div class="card" style="text-align:center;">
+        <div class="icon">📅</div>
+        <h3>Timeline</h3>
+        <p>Week 1 kickoff pending approval. Go-live target: 9 weeks from green light.</p>
+      </div>
+    </div>
+    <div style="margin-top:24px;width:100%;max-width:900px;">
+      <div class="card" style="background:rgba(123,47,190,0.08);border-color:var(--accent);">
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px;">
+          <span style="font-size:18px;">📋</span>
+          <h3 style="font-size:16px;color:var(--accent2);">Agreed Action Items — Conditions for Approval</h3>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+            <span style="color:var(--accent2);font-weight:700;flex-shrink:0;">W1.1</span>
+            <span><strong>Git history scrub</strong> — first documented activity of Week 1, before any other task <span class="badge badge-red" style="margin-left:6px;">CFO</span></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+            <span style="color:var(--accent2);font-weight:700;flex-shrink:0;">W4</span>
+            <span><strong>Formal checkpoint</strong> — progress review at end of Week 4. Delay &gt;3 days triggers business case reassessment <span class="badge badge-red" style="margin-left:6px;">CFO</span></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+            <span style="color:var(--accent2);font-weight:700;flex-shrink:0;">Pre-GL</span>
+            <span><strong>Batch monitoring runbook</strong> — CloudWatch alarms, SNS alerts, documented recovery procedure <span class="badge badge-yellow" style="margin-left:6px;">CTO</span></span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px;">
+            <span style="color:var(--accent2);font-weight:700;flex-shrink:0;">Pre-GL</span>
+            <span><strong>Terraform IaC</strong> — infrastructure as code reviewed and validated before production cutover <span class="badge badge-yellow" style="margin-left:6px;">CTO</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;">
+      <span class="pill">Team TimisA</span>
+      <span class="pill">antonella.a.timis@accenture.com</span>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: Team Kick-off Agenda -->
+  <div class="slide left" id="s11">
+    <div class="section-header">
+      <div class="eyebrow">All-Teams Kick-off · 15 min</div>
+      <h2>Oggi si parte.</h2>
+      <p style="color:var(--muted);margin-top:8px;font-size:16px;">Web App · Batch · Reporting DB · Ops/Infra</p>
+    </div>
+    <div style="width:100%;max-width:950px;display:flex;flex-direction:column;gap:10px;">
+      <div class="card" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">🟢</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">2 min</span>
+        <div><strong>Go / Approvazione</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">CFO e CTO hanno dato il via libera condizionato. Si parte.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Antonella</span>
+      </div>
+      <div class="card" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">🗺️</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">3 min</span>
+        <div><strong>Strategia</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">Refactor cloud-native. Nessun secondo progetto tra 18 mesi. Ecco perché conta per voi.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Antonella</span>
+      </div>
+      <div class="card" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">🔍</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">4 min</span>
+        <div><strong>Discovery</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">5 blocker trovati. Dipendenza batch→webapp sconosciuta. Credenziali in chiaro da 7 anni. Nessuna colpa — solo fatti.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Antonella</span>
+      </div>
+      <div class="card red-border" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">🔴</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">3 min</span>
+        <div><strong>Action item immediato</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">Git history scrub: <strong style="color:#FCA5A5;">settimana 1, giorno 1</strong>, prima di qualsiasi altro task. Responsabile tecnico da assegnare ora.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Team →</span>
+      </div>
+      <div class="card" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">⚡</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">2 min</span>
+        <div><strong>Stream paralleli</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">3 team indipendenti: webapp · batch · reporting-db. Checkpoint W4. Runbook batch + Terraform pre go-live.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Antonella</span>
+      </div>
+      <div class="card" style="display:grid;grid-template-columns:60px 80px 1fr 120px;gap:16px;align-items:center;padding:16px 24px;">
+        <span style="font-size:22px;text-align:center;">❓</span>
+        <span style="font-size:12px;font-weight:700;color:var(--accent2);">1 min</span>
+        <div><strong>Domande bloccanti</strong> <span style="color:var(--muted);font-size:14px;margin-left:8px;">Solo bloccanti. Tutto il resto va in canale async.</span></div>
+        <span style="color:var(--muted);font-size:13px;">Tutti</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: The Deferred Cost Illusion -->
+  <div class="slide left" id="s11">
+    <div class="section-header">
+      <div class="eyebrow">A Friendly Reminder</div>
+      <h2>The Deferred Cost Illusion.</h2>
+      <p style="color:var(--muted);margin-top:8px;font-size:16px;">For those still tempted by the easy route.</p>
+    </div>
+    <div class="grid grid-2" style="max-width:1100px;gap:20px;">
+      <!-- Lift and shift column -->
+      <div class="card red-border">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <span style="font-size:24px;">🐌</span>
+          <h3 style="color:#FCA5A5;">Lift-and-Shift</h3>
+          <span class="badge badge-red" style="margin-left:auto;">Not Recommended</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Faster to start: 6–7 weeks</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Lower initial investment: €18,000</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Familiar approach — no new patterns</span></div>
+          <div class="divider" style="margin:8px 0;"></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Hardcoded IPs survive in production — first RDS failover = outage</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Credentials in plaintext move to cloud untouched</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Hidden batch→webapp dependency causes silent 02:00 failures</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>EC2 always-on: paying 22h idle per day</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Second refactor project guaranteed within 18 months</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Total 24-month cost: <strong style="color:#FCA5A5;">~€61,400</strong></span></div>
+        </div>
+      </div>
+      <!-- Cloud native column -->
+      <div class="card green-border">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+          <span style="font-size:24px;">🚀</span>
+          <h3 style="color:#86EFAC;">Cloud-Native Refactor</h3>
+          <span class="badge badge-green" style="margin-left:auto;">Our Recommendation</span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>2 weeks longer: 8–9 weeks</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--red);flex-shrink:0;">✗</span><span>Higher initial investment: €30,000</span></div>
+          <div class="divider" style="margin:8px 0;"></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>All 5 blockers resolved before go-live</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Secrets managed — compliant from day one</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Auto-scaling: 2–6 Fargate tasks on demand</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Batch pay-per-execution — no idle EC2</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>No second project — ever</span></div>
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;"><span style="color:var(--green);flex-shrink:0;">✓</span><span>Total 24-month cost: <strong style="color:#86EFAC;">~€41,900</strong></span></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:24px;" class="highlight">
+      <p>"Lift-and-shift is not a cheaper option. It is a deferred cost — with interest."</p>
+      <cite>— Contoso Financial Migration Memo, Team TimisA, April 2026</cite>
+    </div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button onclick="prev()">← Prev</button>
+  <span class="counter" id="counter">1 / 11</span>
+  <button onclick="next()">Next →</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length; // auto-counts all slides
+  let current = 0;
+
+  function go(n) {
+    slides[current].classList.remove('active');
+    slides[current].classList.add('prev');
+    setTimeout(() => slides[current].classList.remove('prev'), 500);
+    current = (n + total) % total;
+    slides[current].classList.add('active');
+    document.getElementById('counter').textContent = `${current + 1} / ${total}`;
+    document.getElementById('progress').style.width = `${((current + 1) / total) * 100}%`;
+  }
+
+  function next() { go(current + 1); }
+  function prev() { go(current - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') next();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+  });
+
+  // init progress
+  document.getElementById('progress').style.width = `${(1 / total) * 100}%`;
+</script>
+</body>
+</html>
