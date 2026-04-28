@@ -36,7 +36,15 @@ creds = get_secret("contoso/batch/db-credentials")
 conn = psycopg2.connect(host=os.environ["DB_HOST"], user=creds["username"], password=creds["password"])
 ```
 
-**Rotation:** automatic rotation enabled on all DB credentials, 30-day cycle via Secrets Manager + RDS integration.
+**Rotation:** automatic rotation enabled on all DB credentials, **6-month cycle** via Secrets Manager + RDS native integration. Rotation is automatic and transparent — no manual intervention, no downtime.
+
+**Password masking:** credentials retrieved from Secrets Manager are never logged, printed, or exposed in ECS Task Definition outputs, CloudWatch logs, or debug output. Any logging of connection objects must explicitly exclude the password field:
+```python
+# Never log credentials
+logger.info(f"Connecting to DB at {os.environ['DB_HOST']}")  # OK
+logger.info(f"Connection string: {conn_string}")              # NEVER
+```
+CloudWatch log groups for all workloads have a log filter that redacts any string matching password patterns before storage.
 
 **Local (Docker Compose):** credentials injected via `.env` file that is git-ignored. A `.env.example` with placeholder values is committed instead.
 
@@ -62,7 +70,9 @@ conn = psycopg2.connect(host=os.environ["DB_HOST"], user=creds["username"], pass
 
 - [ ] Remove plaintext credentials from `reconcile.py`
 - [ ] Create secrets in Secrets Manager: `contoso/batch/db-credentials`, `contoso/webapp/db-credentials`
-- [ ] Enable automatic rotation on both secrets
+- [ ] Enable automatic rotation on both secrets with 6-month cycle
 - [ ] Add `.env` to `.gitignore`, commit `.env.example`
 - [ ] Implement `PreToolUse` hook in `.claude/hooks/` to block plaintext secrets in IaC
+- [ ] Add CloudWatch log filter to redact password patterns across all log groups
+- [ ] Audit all logging statements in web app and batch job — remove any that expose credentials
 - [ ] Verify git history does not contain the exposed password (git history scrub if needed)
