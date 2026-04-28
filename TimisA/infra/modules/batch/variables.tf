@@ -1,0 +1,11 @@
+variable "environment"         { type = string }
+variable "private_subnet_ids"  { type = list(string) }
+variable "sg_batch_id"         { type = string }
+variable "db_proxy_endpoint"   { type = string }
+variable "db_secret_arn"       { type = string }
+variable "output_bucket_name"  { type = string }
+variable "output_bucket_arn"   { type = string }
+variable "webapp_warmup_arn"   { type = string }
+variable "webapp_cluster_arn"  { type = string }
+variable "webapp_subnet_ids"   { type = list(string) }
+variable "webapp_sg_id"        { type = string }

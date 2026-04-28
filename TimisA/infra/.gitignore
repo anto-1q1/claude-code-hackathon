@@ -1,0 +1,22 @@
+# Terraform state — never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Plan files may contain secret values
+*.tfplan
+*.plan
+
+# Real variable values — use terraform.tfvars.example as template
+terraform.tfvars
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Crash log
+crash.log
+crash.*.log
