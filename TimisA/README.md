@@ -27,7 +27,7 @@ La discovery ha portato alla luce **5 blocker critici**, inclusa una dipendenza 
 | 4 | The Container | ✅ Complete | Dockerfile per webapp, batch, reporting-db + docker-compose.yml |
 | 5 | The Foundation | ✅ Complete | Terraform IaC con 7 moduli (networking, webapp, batch, database, cache, storage, secrets) |
 | 6 | The Proof | ✅ Complete | Test suite 3 livelli: smoke, contract, discovery + data integrity |
-| 7 | The Scorecard | todo | |
+| 7 | The Scorecard | ✅ Complete | Eval harness IaC — golden patterns vs bad patterns in `scorecard/` |
 | 8 | The Undo | ⏳ Scheduled | Git history scrub pianificato W1 Giorno 1 — credenziale `C0nt0s0#2019` in ADR-0003 |
 | 9 | The Survey | todo | |
 
