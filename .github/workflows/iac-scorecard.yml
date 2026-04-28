@@ -1,0 +1,61 @@
+name: IaC Scorecard
+
+on:
+  push:
+    paths:
+      - "TimisA/infra/**"
+      - "TimisA/scorecard/**"
+  pull_request:
+    paths:
+      - "TimisA/infra/**"
+      - "TimisA/scorecard/**"
+  workflow_dispatch:
+
+jobs:
+  scorecard:
+    name: Evaluate Claude IaC Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run IaC Scorecard Evaluator
+        working-directory: TimisA/scorecard
+        run: |
+          python eval.py \
+            --iac-dir ../infra \
+            --report scorecard_results.json
+
+      - name: Upload scorecard report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: iac-scorecard-${{ github.sha }}
+          path: TimisA/scorecard/scorecard_results.json
+          retention-days: 90
+
+      - name: Post score summary
+        if: always()
+        run: |
+          python - <<'EOF'
+          import json, os, sys
+          p = "TimisA/scorecard/scorecard_results.json"
+          if not os.path.exists(p):
+              print("No report found")
+              sys.exit(0)
+          r = json.load(open(p))
+          s = r["scores"]
+          print(f"## IaC Scorecard Results")
+          print(f"| Metric | Value |")
+          print(f"|--------|-------|")
+          print(f"| Final Score | **{s['final_score_pct']}% ({s['grade']})** |")
+          print(f"| Good-pattern coverage | {s['good_coverage_pct']}% |")
+          print(f"| Bad patterns in IaC | {s['bad_patterns_in_iac']} |")
+          print(f"| Critical flags | {s['critical_flags']} |")
+          print(f"| Hook-blockable writes | {s['hook_blockable']} |")
+          print(f"| Detector self-test | {s.get('detector_self_test_pct', 'N/A')}% |")
+          EOF

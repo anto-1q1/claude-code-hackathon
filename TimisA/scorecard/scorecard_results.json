@@ -1,0 +1,274 @@
+{
+  "timestamp": "2026-04-28T12:55:23.046745Z",
+  "iac_directory": "C:\\Users\\andrea.s.curcio\\Downloads\\claude-code-hackathon\\TimisA\\infra",
+  "tf_files_scanned": [
+    "main.tf",
+    "outputs.tf",
+    "variables.tf",
+    "modules\\batch\\main.tf",
+    "modules\\batch\\outputs.tf",
+    "modules\\batch\\variables.tf",
+    "modules\\cache\\main.tf",
+    "modules\\cache\\outputs.tf",
+    "modules\\cache\\variables.tf",
+    "modules\\database\\main.tf",
+    "modules\\database\\outputs.tf",
+    "modules\\database\\variables.tf",
+    "modules\\networking\\main.tf",
+    "modules\\networking\\outputs.tf",
+    "modules\\networking\\variables.tf",
+    "modules\\secrets\\main.tf",
+    "modules\\secrets\\outputs.tf",
+    "modules\\secrets\\variables.tf",
+    "modules\\storage\\main.tf",
+    "modules\\storage\\outputs.tf",
+    "modules\\storage\\variables.tf",
+    "modules\\webapp\\main.tf",
+    "modules\\webapp\\outputs.tf",
+    "modules\\webapp\\variables.tf"
+  ],
+  "scores": {
+    "good_coverage_pct": 100.0,
+    "bad_patterns_in_iac": 2,
+    "critical_flags": 0,
+    "hook_blockable": 0,
+    "detector_self_test_pct": 100.0,
+    "final_score_pct": 96.0,
+    "grade": "A"
+  },
+  "good_patterns": [
+    {
+      "id": "G01",
+      "description": "Encryption at rest on RDS",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G02",
+      "description": "RDS Multi-AZ enabled",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G03",
+      "description": "RDS deletion protection",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G04",
+      "description": "RDS backup retention > 0",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G05",
+      "description": "RDS not publicly accessible",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G06",
+      "description": "S3 blocks all public access",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G07",
+      "description": "S3 versioning enabled",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G08",
+      "description": "S3 server-side encryption",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G09",
+      "description": "Secrets Manager used for credentials",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G10",
+      "description": "Random password (not variable)",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G11",
+      "description": "Secrets rotation configured",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G12",
+      "description": "ElastiCache encryption in transit",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G13",
+      "description": "ElastiCache encryption at rest",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G14",
+      "description": "RDS Proxy for connection pooling",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G15",
+      "description": "ECS tasks use Secrets Manager injection",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G16",
+      "description": "CloudFront distribution present",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G17",
+      "description": "EventBridge schedules batch job",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G18",
+      "description": "Tags: Environment present",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G19",
+      "description": "Tags: ManagedBy terraform present",
+      "status": "PASS",
+      "tip": null
+    },
+    {
+      "id": "G20",
+      "description": "S3 lifecycle policy configured",
+      "status": "PASS",
+      "tip": null
+    }
+  ],
+  "bad_pattern_self_test": {
+    "total_bad_patterns": 15,
+    "detected": 15,
+    "missed": [],
+    "detection_rate_pct": 100.0
+  },
+  "bad_patterns_in_iac": [
+    {
+      "id": "B01",
+      "description": "Hardcoded password in IaC",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B02",
+      "description": "Hardcoded AWS access key",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B03",
+      "description": "Known Contoso credential leak",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B04",
+      "description": "Wildcard IAM action (*)",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B05",
+      "description": "Wildcard IAM resource (*) with s3:*",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B06",
+      "description": "SSH (port 22) open to 0.0.0.0/0",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B07",
+      "description": "RDP (port 3389) open to 0.0.0.0/0",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B08",
+      "description": "All-traffic ingress from 0.0.0.0/0",
+      "severity": "HIGH",
+      "detected": true,
+      "tip": "Ingress protocol -1 (all) from 0.0.0.0/0 is too permissive"
+    },
+    {
+      "id": "B09",
+      "description": "S3 public ACL",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B10",
+      "description": "S3 block_public_acls = false",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B11",
+      "description": "RDS skip_final_snapshot = true",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B12",
+      "description": "RDS backup disabled (retention=0)",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B13",
+      "description": "Hardcoded IP address in IaC",
+      "severity": "MEDIUM",
+      "detected": true,
+      "tip": "Replace hardcoded IPs with DNS names or variables (ADR-0001)"
+    },
+    {
+      "id": "B14",
+      "description": "NFS/local mount path in IaC",
+      "severity": "HIGH",
+      "detected": false,
+      "tip": null
+    },
+    {
+      "id": "B15",
+      "description": "Password as Terraform variable with default",
+      "severity": "CRITICAL",
+      "detected": false,
+      "tip": null
+    }
+  ]
+}
